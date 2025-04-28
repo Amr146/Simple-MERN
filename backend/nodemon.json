@@ -1,6 +1,7 @@
 {
-	"watch": ["src"],
-	"ext": "ts",
 	"ignore": ["src/**/*.spec.ts"],
-	"exec": "ts-node ./src/index.ts"
+	"watch": ["src", "package.json"],
+	"ext": "ts,js,json",
+	"exec": "npx ts-node-dev --respawn --transpile-only src/index.ts",
+	"legacyWatch": true
 }
