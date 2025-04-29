@@ -5,8 +5,6 @@ node_modules/
 dist/
 build/
 
-# dotenv environment variables
-.env
 
 # Logs
 logs/
