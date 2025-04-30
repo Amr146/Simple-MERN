@@ -6,7 +6,7 @@ dist/
 build/
 
 # dotenv environment variables
-.env
+# .env
 
 # Logs
 logs/
