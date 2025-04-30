@@ -9,17 +9,26 @@ declare global {
 		}
 	}
 }
-import { createUser, getUserById, findUserByEmail } from '../users/service';
 
+import { createUser, getUserById, findUserByEmail } from '../users/service';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import validator from 'validator';
+
 dotenv.config();
+
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || '';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '15m';
 const JWT_REFRESH_EXPIRATION = process.env.JWT_REFRESH_EXPIRATION || '7d';
+
+// Get cookie expiration from environment variable
+const COOKIE_EXPIRATION_MINUTES = parseInt(
+	process.env.COOKIE_EXPIRATION_MINUTES || '1440',
+	10
+);
+const COOKIE_MAX_AGE = COOKIE_EXPIRATION_MINUTES * 60 * 1000; // in ms
 
 export const hashPassword = async (password: string) => {
 	const salt = await bcrypt.genSalt(10);
@@ -49,6 +58,7 @@ export const verifyRefreshToken = (token: string) => {
 export const comparePassword = async (password: string, hash: string) => {
 	return await bcrypt.compare(password, hash);
 };
+
 export const isAuthenticated = async (
 	req: Request,
 	res: Response,
@@ -57,6 +67,7 @@ export const isAuthenticated = async (
 	const token = req.headers['authorization']?.split(' ')[1];
 	if (!token) {
 		res.status(401).json({ error: 'No token provided' });
+		return;
 	}
 	try {
 		const decoded = verifyAccessToken(token as string);
@@ -64,12 +75,14 @@ export const isAuthenticated = async (
 		next();
 	} catch (error) {
 		res.status(401).json({ error: 'Invalid token' });
+		return;
 	}
 };
 
 export const validateEmail = (email: string) => {
 	return validator.isEmail(email);
 };
+
 export const validatePassword = (password: string) => {
 	return validator.isStrongPassword(password);
 };
@@ -112,10 +125,17 @@ export const register = async (req: Request, res: Response) => {
 		if (!user) {
 			return res.status(400).json({ error: 'User registration failed' });
 		}
+		// Set refresh token in a cookie
+		res.cookie('refreshToken', refreshToken, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'strict',
+			maxAge: COOKIE_MAX_AGE,
+		});
+
 		res.status(201).json({
 			message: 'User registered successfully',
 			accessToken,
-			refreshToken,
 		});
 	} catch (error) {
 		res.status(400).json({
@@ -149,9 +169,16 @@ export const login = async (req: Request, res: Response) => {
 		if (!refreshToken) {
 			return res.status(400).json({ error: 'Login failed' });
 		}
-		res
-			.status(200)
-			.json({ message: 'Login successful', accessToken, refreshToken });
+
+		// Set refresh token in a cookie
+		res.cookie('refreshToken', refreshToken, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'strict',
+			maxAge: COOKIE_MAX_AGE,
+		});
+
+		res.status(200).json({ message: 'Login successful', accessToken });
 	} catch (error) {
 		res.status(401).json({
 			error:
@@ -173,7 +200,7 @@ export const getData = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-	const { refreshToken } = req.body;
+	const refreshToken = req.cookies?.refreshToken;
 	if (!refreshToken) {
 		return res.status(400).json({ error: 'Refresh token is required' });
 	}
@@ -186,7 +213,13 @@ export const logout = async (req: Request, res: Response) => {
 			}
 		});
 		// Add the refresh token to the blacklist
-		await addTokenToBlacklist(refreshToken, new Date(decoded.exp * 1000)); // expiration from token
+		await addTokenToBlacklist(refreshToken, new Date(decoded.exp * 1000));
+		// Clear the cookie
+		res.clearCookie('refreshToken', {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'strict',
+		});
 		res.status(200).json({ message: 'Logged out successfully' });
 	} catch (error) {
 		res.status(401).json({ error: 'Invalid refresh token' });
@@ -194,7 +227,7 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const refresh = async (req: Request, res: Response) => {
-	const { refreshToken } = req.body;
+	const refreshToken = req.cookies?.refreshToken;
 	if (!refreshToken) {
 		return res.status(400).json({ error: 'Refresh token is required' });
 	}
