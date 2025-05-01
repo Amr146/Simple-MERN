@@ -7,39 +7,79 @@ const Register: React.FC = () => {
 	const [email, setEmail] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	const [errorMessage, setErrorMessage] = useState<string>('');
+
+	const [confirmPassword, setConfirmPassword] = useState<string>('');
+	const [emailError, setEmailError] = useState<string>('');
+	const [passwordError, setPasswordError] = useState<string>('');
+	const [confirmPasswordError, setConfirmPasswordError] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const { register } = useAuthManager();
 	const navigate = useNavigate();
 
+	// Email validation while typing
+	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setEmail(value);
+		setEmailError(
+			!value.trim()
+				? 'Email is required'
+				: !validator.isEmail(value)
+				? 'Invalid email format'
+				: ''
+		);
+	};
+
+	// Password validation while typing
+	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setPassword(value);
+		setPasswordError(
+			!value.trim()
+				? 'Password is required'
+				: !validator.isStrongPassword(value, {
+						minLength: 8,
+						minLowercase: 1,
+						minUppercase: 1,
+						minNumbers: 1,
+						minSymbols: 1,
+				  })
+				? 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character'
+				: ''
+		);
+	};
+
+	// Confirm password validation while typing
+	const handleConfirmPasswordChange = (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const value = e.target.value;
+		setConfirmPassword(value);
+		setConfirmPasswordError(
+			!value.trim()
+				? 'Confirm Password is required'
+				: value !== password
+				? 'Passwords do not match'
+				: ''
+		);
+	};
+
 	const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (!validator.isEmail(email)) {
-			setErrorMessage('Invalid email format.');
-			return;
-		}
-		if (
-			!validator.isStrongPassword(password, {
-				minLength: 8,
-				minLowercase: 1,
-				minUppercase: 1,
-				minNumbers: 1,
-				minSymbols: 1,
-			})
-		) {
-			setErrorMessage(
-				'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
-			);
+
+		// Prevent submission if errors exist
+		if (emailError || passwordError || confirmPasswordError) {
 			return;
 		}
 
-		setErrorMessage('');
 		setLoading(true);
-
 		try {
 			await register(email, password);
 			navigate('/video');
 		} catch (err: any) {
+			setEmailError('');
+			setPasswordError('');
+			setConfirmPasswordError('');
 			setErrorMessage(
 				err?.response?.data?.error || 'Registration failed. Please try again.'
 			);
@@ -60,7 +100,7 @@ const Register: React.FC = () => {
 						<Link to='/login'>Login</Link>
 					</span>
 				</p>
-				<form onSubmit={handleRegister}>
+				<form onSubmit={handleRegister} noValidate>
 					<div className='mb-4'>
 						<label
 							htmlFor='email'
@@ -72,10 +112,11 @@ const Register: React.FC = () => {
 							id='email'
 							type='email'
 							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							onChange={handleEmailChange}
 							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
 						/>
+						{emailError && <p className='text-sm text-red-500'>{emailError}</p>}
 					</div>
 					<div className='mb-4'>
 						<label
@@ -88,10 +129,32 @@ const Register: React.FC = () => {
 							id='password'
 							type='password'
 							value={password}
-							onChange={(e) => setPassword(e.target.value)}
+							onChange={handlePasswordChange}
 							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
 						/>
+						{passwordError && (
+							<p className='text-sm text-red-500'>{passwordError}</p>
+						)}
+					</div>
+					<div className='mb-4'>
+						<label
+							htmlFor='confirmPassword'
+							className='block mb-2 text-sm font-medium text-gray-600'
+						>
+							Confirm Password
+						</label>
+						<input
+							id='confirmPassword'
+							type='password'
+							value={confirmPassword}
+							onChange={handleConfirmPasswordChange}
+							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
+							required
+						/>
+						{confirmPasswordError && (
+							<p className='text-sm text-red-500'>{confirmPasswordError}</p>
+						)}
 					</div>
 					{errorMessage && (
 						<p className='mb-4 text-sm text-red-500'>{errorMessage}</p>

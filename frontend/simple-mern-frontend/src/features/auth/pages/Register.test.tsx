@@ -31,9 +31,10 @@ describe('Register Component', () => {
 		expect(
 			screen.getByRole('heading', { name: /register/i })
 		).toBeInTheDocument();
-		expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-		expect(screen.getByText(/already registered/i)).toBeInTheDocument(); // Check link text
+		expect(screen.getByLabelText('Email')).toBeInTheDocument();
+		expect(screen.getByLabelText('Password')).toBeInTheDocument();
+		expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
+		expect(screen.getByText(/already registered/i)).toBeInTheDocument();
 	});
 
 	it('submits the form and navigates on success', async () => {
@@ -41,10 +42,13 @@ describe('Register Component', () => {
 
 		render(<Register />, { wrapper: MemoryRouter });
 
-		fireEvent.change(screen.getByLabelText(/email/i), {
+		fireEvent.change(screen.getByLabelText('Email'), {
 			target: { value: 'test@example.com' },
 		});
-		fireEvent.change(screen.getByLabelText(/password/i), {
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: 'Password123!' },
+		});
+		fireEvent.change(screen.getByLabelText('Confirm Password'), {
 			target: { value: 'Password123!' },
 		});
 		fireEvent.click(screen.getByRole('button', { name: /register/i }));
@@ -58,22 +62,42 @@ describe('Register Component', () => {
 		});
 	});
 
+	it('shows an error message when passwords do not match', async () => {
+		render(<Register />, { wrapper: MemoryRouter });
+
+		fireEvent.change(screen.getByLabelText('Email'), {
+			target: { value: 'test@example.com' },
+		});
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: 'Password123!' },
+		});
+		fireEvent.change(screen.getByLabelText('Confirm Password'), {
+			target: { value: 'DifferentPass!' },
+		});
+		fireEvent.click(screen.getByRole('button', { name: /register/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+		});
+	});
+
 	it('shows an error message for weak passwords', async () => {
 		render(<Register />, { wrapper: MemoryRouter });
 
-		fireEvent.change(screen.getByLabelText(/email/i), {
+		fireEvent.change(screen.getByLabelText('Email'), {
 			target: { value: 'test@example.com' },
 		});
-		fireEvent.change(screen.getByLabelText(/password/i), {
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: 'weakpass' },
+		});
+		fireEvent.change(screen.getByLabelText('Confirm Password'), {
 			target: { value: 'weakpass' },
 		});
 		fireEvent.click(screen.getByRole('button', { name: /register/i }));
 
 		await waitFor(() => {
 			expect(
-				screen.getByText(
-					/Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character/i
-				)
+				screen.getByText(/password must be at least 8 characters long/i)
 			).toBeInTheDocument();
 		});
 	});
@@ -81,10 +105,13 @@ describe('Register Component', () => {
 	it('shows an error message for invalid emails', async () => {
 		render(<Register />, { wrapper: MemoryRouter });
 
-		fireEvent.change(screen.getByLabelText(/email/i), {
-			target: { value: 'invalid-email@asa' },
+		fireEvent.change(screen.getByLabelText('Email'), {
+			target: { value: 'invalid-email@sda' },
 		});
-		fireEvent.change(screen.getByLabelText(/password/i), {
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: 'Password123!' },
+		});
+		fireEvent.change(screen.getByLabelText('Confirm Password'), {
 			target: { value: 'Password123!' },
 		});
 		fireEvent.click(screen.getByRole('button', { name: /register/i }));
@@ -101,10 +128,13 @@ describe('Register Component', () => {
 
 		render(<Register />, { wrapper: MemoryRouter });
 
-		fireEvent.change(screen.getByLabelText(/email/i), {
+		fireEvent.change(screen.getByLabelText('Email'), {
 			target: { value: 'used@example.com' },
 		});
-		fireEvent.change(screen.getByLabelText(/password/i), {
+		fireEvent.change(screen.getByLabelText('Password'), {
+			target: { value: 'Password123!' },
+		});
+		fireEvent.change(screen.getByLabelText('Confirm Password'), {
 			target: { value: 'Password123!' },
 		});
 		fireEvent.click(screen.getByRole('button', { name: /register/i }));

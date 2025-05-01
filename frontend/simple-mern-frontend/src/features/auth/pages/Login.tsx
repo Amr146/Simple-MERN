@@ -13,7 +13,20 @@ const Login: React.FC = () => {
 
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
+		// Validation: Check if fields are empty
+		if (!email.trim()) {
+			setErrorMessage('Email is required.');
+			return;
+		}
+		if (!password.trim()) {
+			setErrorMessage('Password is required.');
+			return;
+		}
+
+		setErrorMessage('');
 		setLoading(true);
+
 		try {
 			await login(email, password);
 			navigate('/video');
@@ -42,7 +55,7 @@ const Login: React.FC = () => {
 						<Link to='/register'>Register</Link>
 					</span>
 				</h3>
-				<form onSubmit={handleLogin}>
+				<form onSubmit={handleLogin} noValidate>
 					<div className='mb-4'>
 						<label
 							htmlFor='email'
