@@ -90,8 +90,12 @@ export const register = async (req: Request, res: Response) => {
 			return res.status(500).json({ error: 'Refresh token generation failed' });
 		}
 
-		// Set refresh token in a cookie
-		setRefreshTokenCookie(res, refreshToken);
+		try {
+			// Set refresh token in a cookie
+			setRefreshTokenCookie(res, refreshToken);
+		} catch (error) {
+			return res.status(500).json({ error: 'Refresh token cookie failed' });
+		}
 
 		res.status(201).json({
 			message: 'User registered successfully',
@@ -129,9 +133,12 @@ export const login = async (req: Request, res: Response) => {
 		if (!refreshToken) {
 			return res.status(500).json({ error: 'Login failed' });
 		}
-
-		// Set refresh token in a cookie
-		setRefreshTokenCookie(res, refreshToken);
+		try {
+			// Set refresh token in a cookie
+			setRefreshTokenCookie(res, refreshToken);
+		} catch (error) {
+			return res.status(500).json({ error: 'Login failed' });
+		}
 
 		res.status(200).json({ message: 'Login successful', accessToken });
 	} catch (error) {
@@ -145,9 +152,12 @@ export const login = async (req: Request, res: Response) => {
 export const getData = async (req: Request, res: Response) => {
 	try {
 		const user = await getUserById(req.user.id);
+		if (!user) {
+			return res.status(404).json({ error: 'User not found' });
+		}
 		res.status(200).json({ id: user?._id, email: user?.email });
 	} catch (error) {
-		res.status(404).json({
+		res.status(500).json({
 			error:
 				error instanceof Error ? error.message : 'An unknown error occurred',
 		});

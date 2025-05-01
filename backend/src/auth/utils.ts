@@ -15,7 +15,7 @@ const JWT_REFRESH_EXPIRATION = process.env.JWT_REFRESH_EXPIRATION || '7d';
 const COOKIE_EXPIRATION =
 	(process.env.COOKIE_EXPIRATION as StringValue) || '1d';
 
-let COOKIE_MAX_AGE: number = 24 * 60 * 60 * 1000; // Default to 1 day in milliseconds
+export let COOKIE_MAX_AGE: number = 24 * 60 * 60 * 1000; // Default to 1 day in milliseconds
 
 try {
 	// convert to milliseconds using ms
