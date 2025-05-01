@@ -49,7 +49,7 @@ export const getAllUsers = async () => {
 // Service to find a user by email
 export const findUserByEmail = async (email: string) => {
 	try {
-		return await User.findOne({ email }).select('+password');
+		return await User.findOne({ email });
 	} catch (error) {
 		throw new Error(`Error finding user by email: ${(error as Error).message}`);
 	}
