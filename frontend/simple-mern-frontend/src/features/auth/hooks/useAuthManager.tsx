@@ -1,4 +1,3 @@
-// src/features/auth/hooks/useAuthManager.ts
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { useAuthService } from '../services/authService';
 

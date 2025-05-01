@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useAuthStore } from './stores/useAuthStore';
 import { useAuthManager } from './features/auth/hooks/useAuthManager';
 import { setupInterceptors } from './services/api';
+
 setupInterceptors();
 
 const App: React.FC = () => {

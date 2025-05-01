@@ -9,7 +9,6 @@ const Login: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const { login } = useAuthManager();
-
 	const navigate = useNavigate();
 
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,18 +36,22 @@ const Login: React.FC = () => {
 				<h2 className='mb-6 text-2xl font-bold text-center text-gray-700'>
 					Login
 				</h2>
-				<h3 className='mb-2 text-l text-center text-gray-700'>
+				<h3 className='mb-2 text-lg text-center text-gray-700'>
 					Not registered?{' '}
-					<span className='font-bold'>
-						<Link to={'/signup'}>signUp</Link>
+					<span className='font-bold text-blue-600'>
+						<Link to='/register'>Register</Link>
 					</span>
 				</h3>
 				<form onSubmit={handleLogin}>
 					<div className='mb-4'>
-						<label className='block mb-2 text-sm font-medium text-gray-600'>
-							Email:
+						<label
+							htmlFor='email'
+							className='block mb-2 text-sm font-medium text-gray-600'
+						>
+							Email
 						</label>
 						<input
+							id='email'
 							type='email'
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
@@ -57,10 +60,14 @@ const Login: React.FC = () => {
 						/>
 					</div>
 					<div className='mb-4'>
-						<label className='block mb-2 text-sm font-medium text-gray-600'>
-							Password:
+						<label
+							htmlFor='password'
+							className='block mb-2 text-sm font-medium text-gray-600'
+						>
+							Password
 						</label>
 						<input
+							id='password'
 							type='password'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}

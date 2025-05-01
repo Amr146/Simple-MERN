@@ -8,12 +8,16 @@ const Register: React.FC = () => {
 	const [password, setPassword] = useState<string>('');
 	const [errorMessage, setErrorMessage] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
+
 	const { register } = useAuthManager();
 	const navigate = useNavigate();
 
 	const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-
+		if (!validator.isEmail(email)) {
+			setErrorMessage('Invalid email format.');
+			return;
+		}
 		if (
 			!validator.isStrongPassword(password, {
 				minLength: 8,
@@ -28,44 +32,44 @@ const Register: React.FC = () => {
 			);
 			return;
 		}
-		if (!validator.isEmail(email)) {
-			setErrorMessage('Invalid email format.');
-			return;
-		}
+
 		setErrorMessage('');
 		setLoading(true);
-		await register(email, password)
-			.then(() => {
-				navigate('/video');
-			})
-			.catch((err) => {
-				setErrorMessage(
-					err?.response?.data.error || 'Registration failed. Please try again.'
-				);
-			})
-			.finally(() => {
-				setLoading(false);
-			});
+
+		try {
+			await register(email, password);
+			navigate('/video');
+		} catch (err: any) {
+			setErrorMessage(
+				err?.response?.data?.error || 'Registration failed. Please try again.'
+			);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
 		<div className='flex items-center justify-center min-h-screen bg-gray-100'>
 			<div className='w-full max-w-md p-8 bg-white shadow-lg rounded-lg'>
-				<h2 className='mb-4 text-2xl font-bold text-center text-gray-700'>
+				<h2 className='mb-6 text-2xl font-bold text-center text-gray-700'>
 					Register
 				</h2>
-				<h3 className='mb-2 text-l text-center text-gray-700'>
+				<p className='mb-2 text-lg text-center text-gray-700'>
 					Already registered?{' '}
-					<span className='font-bold'>
-						<Link to={'/login'}>Login</Link>
+					<span className='font-bold text-blue-600'>
+						<Link to='/login'>Login</Link>
 					</span>
-				</h3>
+				</p>
 				<form onSubmit={handleRegister}>
 					<div className='mb-4'>
-						<label className='block mb-2 text-sm font-medium text-gray-600'>
-							Email:
+						<label
+							htmlFor='email'
+							className='block mb-2 text-sm font-medium text-gray-600'
+						>
+							Email
 						</label>
 						<input
+							id='email'
 							type='email'
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
@@ -74,16 +78,18 @@ const Register: React.FC = () => {
 						/>
 					</div>
 					<div className='mb-4'>
-						<label className='block mb-2 text-sm font-medium text-gray-600'>
-							Password:
+						<label
+							htmlFor='password'
+							className='block mb-2 text-sm font-medium text-gray-600'
+						>
+							Password
 						</label>
 						<input
+							id='password'
 							type='password'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring ${
-								errorMessage ? 'border-red-500' : 'focus:border-blue-400'
-							}`}
+							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
 						/>
 					</div>
@@ -92,12 +98,8 @@ const Register: React.FC = () => {
 					)}
 					<button
 						type='submit'
+						className='w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50'
 						disabled={loading}
-						className={`w-full px-4 py-2 text-white rounded-lg ${
-							loading
-								? 'bg-gray-400 cursor-not-allowed'
-								: 'bg-blue-500 hover:bg-blue-600'
-						}`}
 					>
 						{loading ? 'Registering...' : 'Register'}
 					</button>
