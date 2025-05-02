@@ -16,7 +16,7 @@ mongoose
 	.then(() => {
 		console.log('DB connected');
 		// Start the API
-		app.listen(PORT, () => {
+		app.listen(PORT as number, '0.0.0.0', () => {
 			console.log(
 				`Backend server is listening on  http://localhost:${PORT} ....`
 			);

@@ -1,11 +1,9 @@
-name: simple-mern-app
+name: simple-mern-app-production
 
 services:
   mongo:
     image: mongo:7.0.12
-    container_name: mongo
-    ports:
-      - '27017:27017'
+    container_name: simple-mern-app-production-mongo
     volumes:
       - mongo-data:/data/db
     networks:
@@ -14,34 +12,28 @@ services:
   api:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: backend
+      dockerfile: dockerfile.prod
+    container_name: simple-mern-app-production-backend
     restart: unless-stopped
     ports:
       - '3000:3000'
     env_file:
-      - ./backend/.env.dev
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    depends_on:
-      - mongo
+      - ./backend/.env.production
     networks:
       - mern-network
+    depends_on:
+      - mongo
 
   frontend:
     build:
       context: ./frontend/simple-mern-frontend
-      dockerfile: Dockerfile
-    container_name: frontend
+      dockerfile: dockerfile.prod
+    container_name: simple-mern-app-production-frontend
     restart: unless-stopped
-    volumes:
-      - ./frontend/simple-mern-frontend:/app
-      - /app/node_modules
-    env_file:
-      - ./frontend/simple-mern-frontend/.env.dev
     ports:
-      - '5173:5173'
+      - '80:80'
+    env_file:
+      - ./frontend/simple-mern-frontend/.env.production
     networks:
       - mern-network
     depends_on:
@@ -49,6 +41,7 @@ services:
 
 volumes:
   mongo-data:
+
 networks:
   mern-network:
     driver: bridge
