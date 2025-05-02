@@ -1,0 +1,38 @@
+name: simple-mern-app-testing
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: dockerfile.test
+    container_name: simple-mern-app-testing-backend
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./backend/.env.dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - mern-network
+
+  frontend:
+    build:
+      context: ./frontend/simple-mern-frontend
+      dockerfile: dockerfile.test
+    container_name: simple-mern-app-testing-frontend
+    volumes:
+      - ./frontend/simple-mern-frontend:/app
+      - /app/node_modules
+    env_file:
+      - ./frontend/simple-mern-frontend/.env.dev
+    ports:
+      - '5173:5173'
+    networks:
+      - mern-network
+    depends_on:
+      - api
+
+networks:
+  mern-network:
+    driver: bridge

@@ -30,7 +30,10 @@ vi.mock('../services/authService', () => ({
 
 describe('useAuthManager', () => {
 	beforeEach(() => {
-		vi.clearAllMocks(); // Clear all mocks before each test
+		vi.clearAllMocks();
+
+		window.location = undefined as any;
+		window.location = { href: '', assign: vi.fn() } as any;
 	});
 
 	it('logs in a user and sets the token and email', async () => {
@@ -52,11 +55,11 @@ describe('useAuthManager', () => {
 	});
 
 	it('logs out a user, clears auth, and redirects', async () => {
-		const { result } = renderHook(() => useAuthManager());
-
 		mockAuthService.logout.mockResolvedValueOnce({
 			message: 'Logout successful',
 		});
+
+		const { result } = renderHook(() => useAuthManager());
 
 		await act(async () => {
 			await result.current.logout();
@@ -64,6 +67,7 @@ describe('useAuthManager', () => {
 
 		expect(mockAuthService.logout).toHaveBeenCalled();
 		expect(mockClearAuth).toHaveBeenCalled();
+		expect(window.location.href).toBe('/login');
 	});
 
 	it('registers a user, sets the token, and email', async () => {

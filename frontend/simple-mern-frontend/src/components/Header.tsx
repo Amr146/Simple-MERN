@@ -8,7 +8,7 @@ const Header: React.FC = () => {
 
 	return (
 		<header className='flex items-center justify-between px-6 py-4 bg-blue-500 text-white'>
-			<div className='text-xl font-bold'>Website Name</div>
+			<div className='text-xl font-bold'>Vauth </div>
 
 			<div className='flex items-center gap-4'>
 				<span>{userEmail}</span>
