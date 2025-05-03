@@ -7,8 +7,9 @@
 		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"lint": "eslint .",
-		"preview": "vite preview",
-		"build:prod": "vite build --mode production"
+		"preview": "vite preview --port 5173",
+		"build:prod": "vite build --mode production",
+		"test" : "vitest"
 	},
 	"dependencies": {
 		"@tailwindcss/vite": "^4.1.4",
