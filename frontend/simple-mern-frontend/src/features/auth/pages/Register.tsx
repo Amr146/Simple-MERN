@@ -68,6 +68,20 @@ const Register: React.FC = () => {
 			return;
 		}
 
+		if (!email.trim()) {
+			setEmailError('Email is required');
+		}
+		if (!password.trim()) {
+			setPasswordError('Password is required');
+		}
+		if (!confirmPassword.trim()) {
+			setConfirmPasswordError('Confirm Password is required');
+		}
+
+		if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+			return;
+		}
+
 		setLoading(true);
 		try {
 			await register(email, password);
@@ -157,6 +171,7 @@ const Register: React.FC = () => {
 					</p>
 					<button
 						type='submit'
+						style={{ cursor: 'pointer' }}
 						className='w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50'
 						disabled={loading}
 					>

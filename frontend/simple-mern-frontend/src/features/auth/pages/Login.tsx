@@ -6,20 +6,38 @@ const Login: React.FC = () => {
 	const [email, setEmail] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	const [errorMessage, setErrorMessage] = useState<string>('');
+	const [emailError, setEmailError] = useState<string>('');
+	const [passwordError, setPasswordError] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const { login } = authManager;
 	const navigate = useNavigate();
 
+	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setEmail(value);
+		setEmailError(!value.trim() ? 'Email is required' : '');
+	};
+
+	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setPassword(value);
+		setPasswordError(!value.trim() ? 'Password is required' : '');
+	};
+
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		if (!email.trim()) {
-			setErrorMessage('Email is required.');
-			return;
+			setEmailError('Email is required.');
 		}
 		if (!password.trim()) {
-			setErrorMessage('Password is required.');
+			setPasswordError('Password is required.');
+		}
+		if (!email.trim() || !password.trim()) {
+			return;
+		}
+		if (emailError || passwordError) {
 			return;
 		}
 
@@ -58,11 +76,12 @@ const Login: React.FC = () => {
 							id='email'
 							type='email'
 							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							onChange={handleEmailChange}
 							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
 							placeholder='Email'
 						/>
+						{emailError && <p className='text-sm text-red-500'>{emailError}</p>}
 					</div>
 					<div className='mb-4'>
 						<label
@@ -75,11 +94,14 @@ const Login: React.FC = () => {
 							id='password'
 							type='password'
 							value={password}
-							onChange={(e) => setPassword(e.target.value)}
+							onChange={handlePasswordChange}
 							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
 							placeholder='Password'
 						/>
+						{passwordError && (
+							<p className='text-sm text-red-500'>{passwordError}</p>
+						)}
 					</div>
 					{errorMessage && (
 						<p className='mb-4 text-sm text-red-500'>{errorMessage}</p>
@@ -91,6 +113,7 @@ const Login: React.FC = () => {
 						</span>
 					</p>
 					<button
+						style={{ cursor: 'pointer' }}
 						type='submit'
 						className='w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50'
 						disabled={loading}
