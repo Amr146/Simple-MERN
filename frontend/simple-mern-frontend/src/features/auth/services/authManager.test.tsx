@@ -84,11 +84,18 @@ describe('authManager', () => {
 		expect(mockSetUserEmail).toHaveBeenCalledWith('me@example.com');
 		expect(result).toEqual(mockUser);
 	});
+	it('should still clear auth if logout throws with 401', async () => {
+		const error401 = {
+			response: {
+				status: 401,
+			},
+			message: 'Unauthorized',
+		};
 
-	it('should still clear auth if logout throws', async () => {
-		(authService.logout as any).mockRejectedValue(new Error('Network error'));
+		(authService.logout as any).mockRejectedValue(error401);
 
 		await authManager.logout();
+
 		expect(mockClearAuth).toHaveBeenCalled();
 	});
 });

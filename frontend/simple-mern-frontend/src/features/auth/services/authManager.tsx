@@ -7,12 +7,16 @@ export const authManager = {
 		useAuthStore.getState().setToken(accessToken);
 		useAuthStore.getState().setUserEmail(email);
 	},
-
 	async logout() {
 		try {
 			await authService.logout();
-		} catch (error) {
-			console.error('Error logging out:', error);
+		} catch (error: any) {
+			const status = error?.response?.status;
+
+			// Only log errors that aren't 401 or 403
+			if (status !== 401 && status !== 403) {
+				console.error('Logout error:', error);
+			}
 		}
 		useAuthStore.getState().clearAuth();
 		sessionStorage.clear();
