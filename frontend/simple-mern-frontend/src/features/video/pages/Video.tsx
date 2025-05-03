@@ -3,8 +3,7 @@ import Header from '../../../components/Header';
 
 const VideoPlayback: React.FC = () => {
 	const videoRef = useRef<HTMLVideoElement | null>(null);
-	const videoUrl =
-		'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+	const videoUrl = 'https://amr146.github.io/videos/Beach.mp4';
 	const STORAGE_KEY = 'video-playback-time';
 
 	// Save current time to sessionStorage periodically
