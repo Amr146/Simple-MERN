@@ -191,13 +191,13 @@ export const logout = async (req: Request, res: Response) => {
 export const refresh = async (req: Request, res: Response) => {
 	const refreshToken = req.cookies?.refreshToken;
 	if (!refreshToken) {
-		return res.status(400).json({ error: 'Refresh token is required' });
+		return res.status(401).json({ error: 'Refresh token is required' });
 	}
 
 	try {
 		const isBlacklisted = await isTokenBlacklisted(refreshToken);
 		if (isBlacklisted) {
-			return res.status(400).json({ error: 'Invalid refresh token' });
+			return res.status(401).json({ error: 'Invalid refresh token' });
 		}
 	} catch (error) {
 		return res.status(500).json({
