@@ -1,10 +1,38 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Header from '../../../components/Header';
 
 const VideoPlayback: React.FC = () => {
-	// Hardcoded video URL
+	const videoRef = useRef<HTMLVideoElement | null>(null);
 	const videoUrl =
 		'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+	const STORAGE_KEY = 'video-playback-time';
+
+	// Save current time to sessionStorage periodically
+	useEffect(() => {
+		if (localStorage.getItem('forceLogout') === 'true') return;
+
+		const video = videoRef.current;
+
+		const handleTimeUpdate = () => {
+			if (video) {
+				sessionStorage.setItem(STORAGE_KEY, video.currentTime.toString());
+			}
+		};
+
+		video?.addEventListener('timeupdate', handleTimeUpdate);
+
+		return () => {
+			video?.removeEventListener('timeupdate', handleTimeUpdate);
+		};
+	}, []);
+
+	// Restore playback time from sessionStorage
+	useEffect(() => {
+		const savedTime = sessionStorage.getItem(STORAGE_KEY);
+		if (savedTime && videoRef.current) {
+			videoRef.current.currentTime = parseFloat(savedTime);
+		}
+	}, []);
 
 	return (
 		<>
@@ -15,6 +43,7 @@ const VideoPlayback: React.FC = () => {
 						Video Playback
 					</h2>
 					<video
+						ref={videoRef}
 						src={videoUrl}
 						controls
 						autoPlay
