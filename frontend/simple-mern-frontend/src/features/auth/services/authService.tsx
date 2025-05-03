@@ -8,8 +8,9 @@ export const authService = {
 		return response.data.accessToken;
 	},
 
-	async logout() {
+	async logout(accessToken: string) {
 		await baseApi.post('/auth/logout', {}, {
+			headers: { Authorization: `Bearer ${accessToken}` },
 			skipAuthRefresh: true,
 		} as any);
 	},

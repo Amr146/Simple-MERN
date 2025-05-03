@@ -35,11 +35,14 @@ describe('authService', () => {
 	it('should logout successfully', async () => {
 		(baseApi.post as any).mockResolvedValue({});
 
-		await authService.logout();
+		await authService.logout('access-token');
 		expect(baseApi.post).toHaveBeenCalledWith(
 			'/auth/logout',
 			{},
-			{ skipAuthRefresh: true }
+			{
+				headers: { Authorization: `Bearer access-token` },
+				skipAuthRefresh: true,
+			}
 		);
 	});
 

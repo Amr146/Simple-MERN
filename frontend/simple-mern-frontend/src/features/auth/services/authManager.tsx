@@ -8,8 +8,10 @@ export const authManager = {
 		useAuthStore.getState().setUserEmail(email);
 	},
 	async logout() {
+		const accessToken = useAuthStore.getState().accessToken; // Capture token early
+
 		try {
-			await authService.logout();
+			await authService.logout(accessToken);
 		} catch (error: any) {
 			const status = error?.response?.status;
 

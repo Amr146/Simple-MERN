@@ -4,7 +4,6 @@ import { useAuthStore } from './stores/useAuthStore';
 import { authManager } from './features/auth/services/authManager';
 
 const App: React.FC = () => {
-
 	const [loading, setLoading] = useState(true);
 	const setUserEmail = useAuthStore((state) => state.setUserEmail);
 
@@ -14,7 +13,7 @@ const App: React.FC = () => {
 				const userData = await authManager.getUserData();
 				setUserEmail(userData.email);
 			} catch (error) {
-				console.error('Session init failed:', error);
+				console.error('Session init failed:');
 			} finally {
 				setLoading(false);
 			}
