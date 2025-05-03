@@ -17,7 +17,6 @@ beforeAll(async () => {
 	app.use(cookieParser());
 	app.use(router);
 
-	// Connect to the in-memory MongoDB instance
 	await mongoose.connect(mongoUri);
 });
 
@@ -34,6 +33,7 @@ describe('Auth Routes Integration Test', () => {
 		const res = await request(app).post('/register').send({
 			email: 'test@example.com',
 			password: 'P@ssw0rd',
+			confirmPassword: 'P@ssw0rd',
 		});
 
 		expect(res.status).toBe(201);
@@ -41,7 +41,6 @@ describe('Auth Routes Integration Test', () => {
 		expect(res.body).toHaveProperty('message', 'User registered successfully');
 
 		accessToken = res.body.accessToken;
-
 		refreshToken = res.headers['set-cookie'][0].split(';')[0].split('=')[1];
 	});
 
@@ -54,7 +53,6 @@ describe('Auth Routes Integration Test', () => {
 		expect(res.status).toBe(200);
 		expect(res.body).toHaveProperty('accessToken');
 		accessToken = res.body.accessToken;
-
 		refreshToken = res.headers['set-cookie'][0].split(';')[0].split('=')[1];
 	});
 

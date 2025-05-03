@@ -46,9 +46,11 @@ export const isAuthenticated = async (
 };
 
 export const register = async (req: Request, res: Response) => {
-	const { email, password } = req.body;
-	if (!email || !password) {
-		return res.status(400).json({ error: 'Email and password are required' });
+	const { email, password, confirmPassword } = req.body;
+	if (!email || !password || !confirmPassword) {
+		return res
+			.status(400)
+			.json({ error: 'Email, password and confirm password are required' });
 	}
 
 	// Validate email and password
@@ -58,11 +60,14 @@ export const register = async (req: Request, res: Response) => {
 	if (!validatePassword(password)) {
 		return res.status(400).json({ error: 'Password does not meet criteria' });
 	}
+	if (password !== confirmPassword) {
+		return res.status(400).json({ error: 'Passwords do not match' });
+	}
 
 	// Check if user already exists
 	const existingUser = await findUserByEmail(email);
 	if (existingUser) {
-		return res.status(400).json({ error: 'User already exists' });
+		return res.status(409).json({ error: 'User already exists' });
 	}
 
 	// Hash password

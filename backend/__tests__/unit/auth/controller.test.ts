@@ -41,13 +41,22 @@ describe('Auth Controller Unit Tests', () => {
 
 	describe('register', () => {
 		it('should return 400 if email is missing', async () => {
-			const req = mockRequest({ email: '', password: 'Password123!' });
+			const req = mockRequest({
+				email: '',
+				password: 'Password123!',
+				confirmPassword: 'Password123!',
+			});
 			const res = mockResponse();
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(400);
 		});
+
 		it('should return 400 if password is missing', async () => {
-			const req = mockRequest({ email: 'test@test.com', password: '' });
+			const req = mockRequest({
+				email: 'test@test.com',
+				password: '',
+				confirmPassword: '',
+			});
 			const res = mockResponse();
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(400);
@@ -56,38 +65,57 @@ describe('Auth Controller Unit Tests', () => {
 		it('should return 400 if email is invalid', async () => {
 			jest.spyOn(utils, 'validateEmail').mockReturnValue(false);
 			jest.spyOn(utils, 'validatePassword').mockReturnValue(true);
-			jest.spyOn(utils, 'hashPassword').mockResolvedValue('hashed');
 
 			const req = mockRequest({
 				email: 'invalid-email',
 				password: 'Password123!',
+				confirmPassword: 'Password123!',
 			});
 			const res = mockResponse();
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(400);
 		});
+
 		it('should return 400 if password is weak', async () => {
 			jest.spyOn(utils, 'validateEmail').mockReturnValue(true);
 			jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
 			jest.spyOn(utils, 'validatePassword').mockReturnValue(false);
-			jest.spyOn(userService, 'createUser').mockResolvedValue(mockUser);
+
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'weakpass',
+				confirmPassword: 'weakpass',
 			});
 			const res = mockResponse();
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(400);
 		});
-		it('should return 400 if user already exists', async () => {
-			jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(mockUser);
+
+		it('should return 400 if passwords do not match', async () => {
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'Password123!',
+				confirmPassword: 'Mismatch123!',
 			});
 			const res = mockResponse();
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(400);
+		});
+
+		it('should return 409 if user already exists', async () => {
+			jest.spyOn(utils, 'validateEmail').mockReturnValue(true);
+			jest.spyOn(utils, 'validatePassword').mockReturnValue(true);
+			jest.spyOn(utils, 'hashPassword').mockResolvedValue('hashed');
+			jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(mockUser);
+
+			const req = mockRequest({
+				email: 'test@test.com',
+				password: 'Password123!',
+				confirmPassword: 'Password123!',
+			});
+			const res = mockResponse();
+			await register(req, res);
+			expect(res.status).toHaveBeenCalledWith(409);
 		});
 
 		it('should return 500 if password hashing fails', async () => {
@@ -95,9 +123,11 @@ describe('Auth Controller Unit Tests', () => {
 			jest.spyOn(utils, 'validateEmail').mockReturnValue(true);
 			jest.spyOn(utils, 'validatePassword').mockReturnValue(true);
 			jest.spyOn(utils, 'hashPassword').mockResolvedValue('');
+
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'Password123!',
+				confirmPassword: 'Password123!',
 			});
 			const res = mockResponse();
 			await register(req, res);
@@ -112,9 +142,11 @@ describe('Auth Controller Unit Tests', () => {
 			jest
 				.spyOn(userService, 'createUser')
 				.mockRejectedValue(new Error('Failed to create user'));
+
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'Password123!',
+				confirmPassword: 'Password123!',
 			});
 			const res = mockResponse();
 			await register(req, res);
@@ -128,14 +160,17 @@ describe('Auth Controller Unit Tests', () => {
 			jest.spyOn(utils, 'hashPassword').mockResolvedValue('hashed');
 			jest.spyOn(userService, 'createUser').mockResolvedValue(mockUser);
 			jest.spyOn(utils, 'generateAccessToken').mockReturnValue('');
+
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'Password123!',
+				confirmPassword: 'Password123!',
 			});
 			const res = mockResponse();
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(500);
 		});
+
 		it('should return 500 if refresh token generation fails', async () => {
 			jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
 			jest.spyOn(utils, 'validateEmail').mockReturnValue(true);
@@ -144,14 +179,17 @@ describe('Auth Controller Unit Tests', () => {
 			jest.spyOn(userService, 'createUser').mockResolvedValue(mockUser);
 			jest.spyOn(utils, 'generateAccessToken').mockReturnValue('access');
 			jest.spyOn(utils, 'generateRefreshToken').mockReturnValue('');
+
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'Password123!',
+				confirmPassword: 'Password123!',
 			});
 			const res = mockResponse();
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(500);
 		});
+
 		it('should return 500 if setting cookie fails', async () => {
 			jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
 			jest.spyOn(utils, 'validateEmail').mockReturnValue(true);
@@ -163,12 +201,13 @@ describe('Auth Controller Unit Tests', () => {
 			jest.spyOn(utils, 'setRefreshTokenCookie').mockImplementation(() => {
 				throw new Error('Failed to set cookie');
 			});
+
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'Password123!',
+				confirmPassword: 'Password123!',
 			});
 			const res = mockResponse();
-
 			await register(req, res);
 			expect(res.status).toHaveBeenCalledWith(500);
 		});
@@ -186,10 +225,10 @@ describe('Auth Controller Unit Tests', () => {
 			const req = mockRequest({
 				email: 'test@test.com',
 				password: 'Password123!',
+				confirmPassword: 'Password123!',
 			});
 			const res = mockResponse();
 			await register(req, res);
-
 			expect(res.status).toHaveBeenCalledWith(201);
 			expect(res.json).toHaveBeenCalledWith({
 				message: 'User registered successfully',
