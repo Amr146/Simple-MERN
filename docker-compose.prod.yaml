@@ -5,6 +5,7 @@ services:
     image: mongo:7.0.12
     container_name: simple-mern-app-production-mongo
     volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - mongo-data:/data/db
     networks:
       - mern-network
