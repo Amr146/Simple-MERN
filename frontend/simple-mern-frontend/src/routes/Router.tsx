@@ -10,6 +10,7 @@ import Login from '../features/auth/pages/Login';
 import Register from '../features/auth/pages/Register';
 import Video from '../features/video/pages/Video';
 import ProtectedRoute from './ProtectedRoute';
+import Profile from '../features/auth/pages/Profile';
 
 const AppRouter: React.FC = () => {
 	return (
@@ -22,6 +23,7 @@ const AppRouter: React.FC = () => {
 				{/* Protected Routes */}
 				<Route element={<ProtectedRoute />}>
 					<Route path='/video' element={<Video />} />
+					<Route path='/profile' element={<Profile />} />
 				</Route>
 
 				{/* Fallback */}
