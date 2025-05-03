@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import validator from 'validator';
-import { useAuthManager } from '../hooks/useAuthManager';
+import { authManager } from '../services/authManager';
 
 const Register: React.FC = () => {
 	const [email, setEmail] = useState<string>('');
@@ -14,10 +14,9 @@ const Register: React.FC = () => {
 	const [confirmPasswordError, setConfirmPasswordError] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 
-	const { register } = useAuthManager();
+	const { register } = authManager;
 	const navigate = useNavigate();
 
-	// Email validation while typing
 	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 		setEmail(value);
@@ -30,7 +29,6 @@ const Register: React.FC = () => {
 		);
 	};
 
-	// Password validation while typing
 	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 		setPassword(value);
@@ -49,7 +47,6 @@ const Register: React.FC = () => {
 		);
 	};
 
-	// Confirm password validation while typing
 	const handleConfirmPasswordChange = (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -67,7 +64,6 @@ const Register: React.FC = () => {
 	const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		// Prevent submission if errors exist
 		if (emailError || passwordError || confirmPasswordError) {
 			return;
 		}
@@ -94,18 +90,9 @@ const Register: React.FC = () => {
 				<h2 className='mb-6 text-2xl font-bold text-center text-gray-700'>
 					Register
 				</h2>
-				<p className='mb-2 text-lg text-center text-gray-700'>
-					Already registered?{' '}
-					<span className='font-bold text-blue-600'>
-						<Link to='/login'>Login</Link>
-					</span>
-				</p>
 				<form onSubmit={handleRegister} noValidate>
 					<div className='mb-4'>
-						<label
-							htmlFor='email'
-							className='block mb-2 text-sm font-medium text-gray-600'
-						>
+						<label htmlFor='email' className='block mb-2 text-sm text-gray-600'>
 							Email
 						</label>
 						<input
@@ -115,13 +102,14 @@ const Register: React.FC = () => {
 							onChange={handleEmailChange}
 							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
+							placeholder='Email'
 						/>
 						{emailError && <p className='text-sm text-red-500'>{emailError}</p>}
 					</div>
 					<div className='mb-4'>
 						<label
 							htmlFor='password'
-							className='block mb-2 text-sm font-medium text-gray-600'
+							className='block mb-2 text-sm text-gray-600'
 						>
 							Password
 						</label>
@@ -132,6 +120,7 @@ const Register: React.FC = () => {
 							onChange={handlePasswordChange}
 							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
+							placeholder='Password'
 						/>
 						{passwordError && (
 							<p className='text-sm text-red-500'>{passwordError}</p>
@@ -140,7 +129,7 @@ const Register: React.FC = () => {
 					<div className='mb-4'>
 						<label
 							htmlFor='confirmPassword'
-							className='block mb-2 text-sm font-medium text-gray-600'
+							className='block mb-2 text-sm text-gray-600'
 						>
 							Confirm Password
 						</label>
@@ -151,6 +140,7 @@ const Register: React.FC = () => {
 							onChange={handleConfirmPasswordChange}
 							className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400'
 							required
+							placeholder='Confirm Password'
 						/>
 						{confirmPasswordError && (
 							<p className='text-sm text-red-500'>{confirmPasswordError}</p>
@@ -159,6 +149,12 @@ const Register: React.FC = () => {
 					{errorMessage && (
 						<p className='mb-4 text-sm text-red-500'>{errorMessage}</p>
 					)}
+					<p className='mb-4 text-lg text-center text-gray-700'>
+						Already registered?{' '}
+						<span className='font-bold text-blue-600'>
+							<Link to='/login'>Login</Link>
+						</span>
+					</p>
 					<button
 						type='submit'
 						className='w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50'

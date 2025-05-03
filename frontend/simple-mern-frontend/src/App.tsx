@@ -1,32 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AppRouter from './routes/Router';
-import { useEffect } from 'react';
 import { useAuthStore } from './stores/useAuthStore';
-import { useAuthManager } from './features/auth/hooks/useAuthManager';
-import { setupInterceptors } from './services/api';
-
-setupInterceptors();
+import { authManager } from './features/auth/services/authManager';
 
 const App: React.FC = () => {
-	const { refresh, getUserData } = useAuthManager();
-	const [loading, setLoading] = React.useState(true);
+
+	const [loading, setLoading] = useState(true);
 	const setUserEmail = useAuthStore((state) => state.setUserEmail);
 
 	useEffect(() => {
-		const refreshAccessToken = async () => {
+		const initSession = async () => {
 			try {
-				await refresh();
-				const userData = await getUserData();
+				const userData = await authManager.getUserData();
 				setUserEmail(userData.email);
 			} catch (error) {
-				console.error('Error refreshing access token:', error);
+				console.error('Session init failed:', error);
 			} finally {
 				setLoading(false);
 			}
 		};
-		refreshAccessToken();
-	}, []);
 
-	return loading ? <></> : <AppRouter />;
+		initSession();
+	}, [setUserEmail]);
+
+	if (loading) return null;
+
+	return <AppRouter />;
 };
+
 export default App;

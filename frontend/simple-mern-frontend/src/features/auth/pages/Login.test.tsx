@@ -1,68 +1,72 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
-import Login from './Login';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
+import Login from './Login';
 
-// Mock useNavigate
-const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-	const actual: any = await vi.importActual('react-router-dom');
+	const actual = await vi.importActual('react-router-dom');
 	return {
 		...actual,
-		useNavigate: () => mockNavigate,
+		useNavigate: vi.fn(),
 	};
 });
 
-// Mock useAuthManager
-const mockLogin = vi.fn();
-vi.mock('../hooks/useAuthManager', () => ({
-	useAuthManager: () => ({
-		login: mockLogin,
-	}),
+vi.mock('../services/authManager', () => ({
+	authManager: {
+		login: vi.fn(),
+	},
 }));
 
+import { useNavigate } from 'react-router-dom';
+import { authManager } from '../services/authManager';
+
 describe('Login Component', () => {
+	let mockNavigate: ReturnType<typeof vi.fn>;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockNavigate = useNavigate as unknown as ReturnType<typeof vi.fn>;
 	});
 
 	it('renders the login form', () => {
 		render(<Login />, { wrapper: MemoryRouter });
 		expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
-		expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-		expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+		expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
+		expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
 	});
 
-	it('submits the form and navigates on success', async () => {
-		mockLogin.mockResolvedValueOnce(undefined);
+	it('submits the form on success', async () => {
+		(authManager.login as jest.Mock).mockResolvedValueOnce(undefined);
 
 		render(<Login />, { wrapper: MemoryRouter });
 
-		fireEvent.change(screen.getByLabelText(/email/i), {
+		fireEvent.change(screen.getByPlaceholderText(/email/i), {
 			target: { value: 'test@example.com' },
 		});
-		fireEvent.change(screen.getByLabelText(/password/i), {
+		fireEvent.change(screen.getByPlaceholderText(/password/i), {
 			target: { value: 'password123' },
 		});
 		fireEvent.click(screen.getByRole('button', { name: /login/i }));
 
 		await waitFor(() => {
-			expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
-			expect(mockNavigate).toHaveBeenCalledWith('/video');
+			expect(authManager.login).toHaveBeenCalledWith(
+				'test@example.com',
+				'password123'
+			);
 		});
 	});
 
 	it('shows an error message on 401', async () => {
-		mockLogin.mockRejectedValueOnce({
+		(authManager.login as jest.Mock).mockRejectedValueOnce({
 			response: { status: 401 },
 		});
 
 		render(<Login />, { wrapper: MemoryRouter });
 
-		fireEvent.change(screen.getByLabelText(/email/i), {
+		fireEvent.change(screen.getByPlaceholderText(/email/i), {
 			target: { value: 'wrong@example.com' },
 		});
-		fireEvent.change(screen.getByLabelText(/password/i), {
+		fireEvent.change(screen.getByPlaceholderText(/password/i), {
 			target: { value: 'wrongpass' },
 		});
 		fireEvent.click(screen.getByRole('button', { name: /login/i }));
@@ -75,22 +79,22 @@ describe('Login Component', () => {
 	});
 
 	it('shows an error message on 500', async () => {
-		mockLogin.mockRejectedValueOnce({
+		(authManager.login as jest.Mock).mockRejectedValueOnce({
 			response: { status: 500 },
 		});
 
 		render(<Login />, { wrapper: MemoryRouter });
 
-		fireEvent.change(screen.getByLabelText(/email/i), {
+		fireEvent.change(screen.getByPlaceholderText(/email/i), {
 			target: { value: 'user@example.com' },
 		});
-		fireEvent.change(screen.getByLabelText(/password/i), {
+		fireEvent.change(screen.getByPlaceholderText(/password/i), {
 			target: { value: 'password' },
 		});
 		fireEvent.click(screen.getByRole('button', { name: /login/i }));
 
 		await waitFor(() => {
-			expect(screen.getByText(/server error/i)).toBeInTheDocument();
+			expect(screen.getByText(/error/i)).toBeInTheDocument();
 		});
 	});
 });

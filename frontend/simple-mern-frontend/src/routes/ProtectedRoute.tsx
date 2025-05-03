@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../stores/useAuthStore';
 
 const ProtectedRoute: React.FC = () => {
-	const token = useAuthStore((state) => state.token);
+	const token = useAuthStore((state) => state.accessToken);
 
 	return token ? <Outlet /> : <Navigate to='/login' />;
 };

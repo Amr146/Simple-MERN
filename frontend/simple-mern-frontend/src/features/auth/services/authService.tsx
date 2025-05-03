@@ -1,43 +1,35 @@
-import { useApi } from '../../../hooks/useApi';
+import { baseApi } from '../../../services/api';
 
-export const useAuthService = () => {
-	const api = useApi();
-
-	const login = async (email: string, password: string) => {
-		const response = await api.post('/auth/login', { email, password }, {
+export const authService = {
+	async login(email: string, password: string) {
+		const response = await baseApi.post('/auth/login', { email, password }, {
 			skipAuthRefresh: true,
 		} as any);
 		return response.data.accessToken;
-	};
+	},
 
-	const logout = async () => {
-		await api.post('/auth/logout');
-	};
+	async logout() {
+		await baseApi.post('/auth/logout', {}, {
+			skipAuthRefresh: true,
+		} as any);
+	},
 
-	const refreshAccessToken = async () => {
-		const response = await api.post('/auth/refresh', {}, {
+	async refreshAccessToken() {
+		const response = await baseApi.post('/auth/refresh', {}, {
 			skipAuthRefresh: true,
 		} as any);
 		return response.data.accessToken;
-	};
+	},
 
-	const getUserData = async () => {
-		const response = await api.get('/auth/me');
+	async getUserData() {
+		const response = await baseApi.get('/auth/me');
 		return response.data;
-	};
+	},
 
-	const register = async (email: string, password: string) => {
-		const response = await api.post('/auth/register', { email, password }, {
+	async register(email: string, password: string) {
+		const response = await baseApi.post('/auth/register', { email, password }, {
 			skipAuthRefresh: true,
 		} as any);
 		return response.data;
-	};
-
-	return {
-		login,
-		logout,
-		refreshAccessToken,
-		getUserData,
-		register,
-	};
+	},
 };
