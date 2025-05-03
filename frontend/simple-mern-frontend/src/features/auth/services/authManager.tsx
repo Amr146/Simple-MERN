@@ -24,8 +24,12 @@ export const authManager = {
 		sessionStorage.clear();
 	},
 
-	async register(email: string, password: string) {
-		const { accessToken } = await authService.register(email, password);
+	async register(email: string, password: string, confirmPassword: string) {
+		const { accessToken } = await authService.register(
+			email,
+			password,
+			confirmPassword
+		);
 		useAuthStore.getState().setToken(accessToken);
 		useAuthStore.getState().setUserEmail(email);
 	},

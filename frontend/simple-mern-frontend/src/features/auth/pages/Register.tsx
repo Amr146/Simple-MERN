@@ -84,7 +84,7 @@ const Register: React.FC = () => {
 
 		setLoading(true);
 		try {
-			await register(email, password);
+			await register(email, password, confirmPassword);
 			navigate('/video');
 		} catch (err: any) {
 			setEmailError('');

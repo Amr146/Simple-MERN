@@ -27,10 +27,14 @@ export const authService = {
 		return response.data;
 	},
 
-	async register(email: string, password: string) {
-		const response = await baseApi.post('/auth/register', { email, password }, {
-			skipAuthRefresh: true,
-		} as any);
+	async register(email: string, password: string, confirmPassword: string) {
+		const response = await baseApi.post(
+			'/auth/register',
+			{ email, password, confirmPassword },
+			{
+				skipAuthRefresh: true,
+			} as any
+		);
 		return response.data;
 	},
 };

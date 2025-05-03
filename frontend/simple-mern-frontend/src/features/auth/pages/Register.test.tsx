@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { authManager } from '../services/authManager';
 
 const mockNavigate = vi.fn();
+
 vi.mock('react-router-dom', async () => {
 	const actual: any = await vi.importActual('react-router-dom');
 	return {
@@ -59,6 +60,7 @@ describe('Register Component', () => {
 		await waitFor(() => {
 			expect(mockRegister).toHaveBeenCalledWith(
 				'test@example.com',
+				'Password123!',
 				'Password123!'
 			);
 			expect(mockNavigate).toHaveBeenCalledWith('/video');
@@ -81,6 +83,7 @@ describe('Register Component', () => {
 
 		await waitFor(() => {
 			expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+			expect(mockRegister).not.toHaveBeenCalled();
 		});
 	});
 
@@ -100,6 +103,7 @@ describe('Register Component', () => {
 
 		await waitFor(() => {
 			expect(screen.getByText(/least one uppercase/i)).toBeInTheDocument();
+			expect(mockRegister).not.toHaveBeenCalled();
 		});
 	});
 
@@ -119,6 +123,7 @@ describe('Register Component', () => {
 
 		await waitFor(() => {
 			expect(screen.getByText(/invalid email/i)).toBeInTheDocument();
+			expect(mockRegister).not.toHaveBeenCalled();
 		});
 	});
 
@@ -141,7 +146,12 @@ describe('Register Component', () => {
 		fireEvent.click(screen.getByRole('button', { name: /register/i }));
 
 		await waitFor(() => {
-			expect(screen.getByText(/use/i)).toBeInTheDocument();
+			expect(screen.getByText(/email already in use/i)).toBeInTheDocument();
+			expect(mockRegister).toHaveBeenCalledWith(
+				'used@example.com',
+				'Password123!',
+				'Password123!'
+			);
 		});
 	});
 });

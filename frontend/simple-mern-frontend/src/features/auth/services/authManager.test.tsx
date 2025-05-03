@@ -57,9 +57,10 @@ describe('authManager', () => {
 			accessToken: 'reg-token',
 		});
 
-		await authManager.register('new@example.com', 'secret');
+		await authManager.register('new@example.com', 'secret', 'secret');
 		expect(authService.register).toHaveBeenCalledWith(
 			'new@example.com',
+			'secret',
 			'secret'
 		);
 		expect(mockSetToken).toHaveBeenCalledWith('reg-token');
