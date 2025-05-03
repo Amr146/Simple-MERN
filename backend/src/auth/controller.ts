@@ -167,14 +167,14 @@ export const getData = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
 	const refreshToken = req.cookies?.refreshToken;
 	if (!refreshToken) {
-		return res.status(400).json({ error: 'Refresh token is required' });
+		return res.status(401).json({ error: 'Refresh token is required' });
 	}
 
 	try {
 		const decoded: any = verifyRefreshToken(refreshToken);
 		await isTokenBlacklisted(refreshToken).then((isBlacklisted) => {
 			if (isBlacklisted) {
-				return res.status(400).json({ error: 'Invalid refresh token' });
+				return res.status(401).json({ error: 'Invalid refresh token' });
 			}
 		});
 		// Add the refresh token to the blacklist
@@ -184,7 +184,7 @@ export const logout = async (req: Request, res: Response) => {
 		// Send a response
 		res.status(200).json({ message: 'Logged out successfully' });
 	} catch (error) {
-		res.status(401).json({ error: 'Invalid refresh token' });
+		res.status(500).json({ error: 'An unknown error occurred' });
 	}
 };
 
